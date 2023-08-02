@@ -1,0 +1,15 @@
+.bg-sign {
+  background: url("/signinbg.svg");
+}
+
+.main-bg {
+  background-image: linear-gradient(
+    to right top,
+    #082032,
+    #13293b,
+    #1e3344,
+    #283d4d,
+    #334756
+  );
+}
+

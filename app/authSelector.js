@@ -1,14 +1,9 @@
-"use client";
-import SignUser from "./join/page";
-import userContext from "@/contexts/userContext";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 import { auth } from "./auth";
-import dashboard from "./dashboard/page";
-import Dashboard from "./dashboard/page";
-import AuthSelector from "./authSelector";
 import { easeInOut, motion } from "framer-motion";
 
-export default function Home() {
+function AuthSelector({ authSelect }) {
   const [authData, setAuthData] = useState(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -43,10 +38,7 @@ export default function Home() {
     </>
   );
 
-  return (
-    <main className="App w-[100%] h-screen">
-      {loadingDiv}
-      {authData !== null && <AuthSelector authSelect={authData} />}
-    </main>
-  );
+  return <>{loadingDiv}{authSelect.data ? redirect("/dashboard") : redirect("/join")}</>;
 }
+
+export default AuthSelector;
