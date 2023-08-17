@@ -4,9 +4,12 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, hideLoader } from "../auth";
 import { easeInOut, motion } from "framer-motion";
+import Header from "./Header";
+import "./dashboard.css";
+import Postsection from "./Postsection";
+import Post from "@/backend/model/Post";
 
 function Dashboard() {
-  const router = useRouter();
   const [authData, setAuthData] = useState(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -42,11 +45,6 @@ function Dashboard() {
     </>
   );
 
-  function signOut() {
-    localStorage.removeItem("jwtoken");
-    router.push("/join");
-  }
-
   {
     {
       if (loading) return loadingDiv;
@@ -57,16 +55,27 @@ function Dashboard() {
     }
 
     if (authData && authData.error) {
-      console.log("gone into error");
       redirect("join");
     } else if (authData && authData.data) {
       return (
-        <div className="text-black">
-          <button className="btn btn-primary" onClick={signOut}>
-            Sign Out
-          </button>
-          {`Welocome ${authData.data.user.firstname}`}
-        </div>
+        <>
+          <div className="BodyComponent fluid-container pt-1">
+            <div className="mb-3">
+              <Header userData={authData.data} setLoading={setLoading} />
+            </div>
+            <div className="grid lg:grid-cols-4 justify-items-center gap-3 px-3">
+              <div className="hidden lg:block glass h-80 col-span-1 w-full text-center">
+                1
+              </div>
+              <div className="col-span-2 w-full text-center p-1">
+                <Postsection userData={authData.data} />
+              </div>
+              <div className="hidden lg:block glass h-80 col-span-1 w-full text-center">
+                3
+              </div>
+            </div>
+          </div>
+        </>
       );
     }
   }

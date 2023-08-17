@@ -5,9 +5,10 @@ import postRouter from "./routes/post";
 import dotenv from "dotenv";
 import cors from "cors";
 
-
 const app = express();
 dotenv.config();
+
+app.use(cors());
 
 app.use(express.json());
 app.use(cors());

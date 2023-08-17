@@ -69,7 +69,11 @@ export const signIn = async (req, res, next) => {
   let existingUser;
 
   try {
-    existingUser = await User.findOne({ email: email });
+    existingUser = await User.findOne({ email: email }).select([
+      "-profileImage",
+      "-friendList",
+      "-pendingFrienList",
+    ]);
   } catch (err) {
     console.log(err);
   }
