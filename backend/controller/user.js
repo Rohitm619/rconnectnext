@@ -2,6 +2,7 @@ import User from "../model/User";
 import bcrypt from "bcryptjs";
 import Jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -98,6 +99,39 @@ export const signIn = async (req, res, next) => {
     } else {
       return res.status(400).json({ message: "Invalid Credentials!" });
     }
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  const password = req.body.currentPassword;
+  const newPassword = req.body.newPassword;
+  const email = req.user.existingUser.email;
+  let existingUser;
+
+  try {
+    existingUser = await User.findOne({ email: email }).select([
+      "-profileImage",
+      "-friendList",
+      "-pendingFrienList",
+    ]);
+  } catch (err) {
+    console.log(err);
+  }
+
+  let isValidPassword = bcrypt.compareSync(password, existingUser.password);
+  if (isValidPassword) {
+    try {
+      const hashedPassword = bcrypt.hashSync(newPassword);
+      let result = await User.findOneAndUpdate(
+        { email: req.user.existingUser.email },
+        { password: hashedPassword }
+      );
+      return res.status(200).json({ message: "update success!" });
+    } catch (err) {
+      return res.status(404).json({ message: "Something went wrong!" });
+    }
+  } else {
+    return res.status(400).json({ message: "Current Password doesn't match!" });
   }
 };
 

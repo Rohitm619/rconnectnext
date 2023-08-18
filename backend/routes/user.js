@@ -9,6 +9,7 @@ import {
   signUp,
   updateUser,
   myProfile,
+  changePassword,
 } from "../controller/user";
 import { verifyUser } from "../middleware/user";
 
@@ -23,5 +24,6 @@ userRouter.patch("/updateuser/:userid", verifyUser, updateUser);
 userRouter.delete("/deleteuser/:userid", verifyUser, deleteUser);
 userRouter.get("/getfriends/:userid", verifyUser, getFriends);
 userRouter.get("/getpendingfriends/:userid", verifyUser, getPendingFriends);
+userRouter.patch("/changepassword", verifyUser, changePassword);
 
 export default userRouter;

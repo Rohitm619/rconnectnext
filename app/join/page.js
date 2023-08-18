@@ -474,7 +474,6 @@ function SignUser({ signin = true }) {
           router.push("/dashboard");
         },
         (error) => {
-          console.log(error);
           setAlertMsg({ visible: true, message: error.response.data.message });
           setTimeout(() => {
             setAlertMsg({ visible: false, message: "" });

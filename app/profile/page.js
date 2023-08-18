@@ -8,6 +8,8 @@ import { useWindowSize } from "@uidotdev/usehooks";
 import Confetti from "react-confetti";
 import axios from "axios";
 import FileResizer from "react-image-file-resizer";
+import ChangePassword from "./ChangePassword";
+import MyPosts from "./MyPosts";
 
 function Profile() {
   const router = useRouter();
@@ -20,6 +22,7 @@ function Profile() {
     message: "",
   });
   const [profileImg64, setProfileImg64] = useState();
+  const [showChangePassDiv, setShowChangePassDiv] = useState(false);
 
   const profileFirstName = useRef();
   const profileLastName = useRef();
@@ -100,6 +103,29 @@ function Profile() {
     </>
   );
 
+  const editPasswordDiv = (
+    <div
+      className="w-screen h-screen fixed z-50 bg-[rgba(0,0,0,0.5)] left-0 top-0 flex justify-center items-center text-white"
+      onClick={() => setShowChangePassDiv(!showChangePassDiv)}
+    >
+      <div
+        className="bg-[#CBE4DE] lg:w-2/5 w-4/5 rounded-xl lg:p-5 p-4 gap-3 flex flex-col text-[#0E8388]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between">
+          <span className=" font-extrabold text-2xl">Change Password</span>
+          <span>
+            <i
+              className="fas fa-solid fa-xmark text-2xl text-[#0E8388] cursor-pointer"
+              onClick={() => setShowChangePassDiv(false)}
+            ></i>
+          </span>
+        </div>
+        <div>{authData && authData.data ? <ChangePassword /> : ""}</div>
+      </div>
+    </div>
+  );
+
   function saveChanges() {
     setIsDisabled(true);
     const pathData = async () => {
@@ -137,8 +163,6 @@ function Profile() {
         100,
         0,
         (base64Img) => {
-          console.log("bs64 in function");
-          console.log(base64Img);
           setProfileImg64(base64Img);
 
           axios.patch(
@@ -171,9 +195,10 @@ function Profile() {
     <>
       {alertDiv}
       {alertSuccessDiv}
+      {showChangePassDiv ? <>{editPasswordDiv}</> : ""}
       <Header userData={authData.data} setLoading={setLoading} />
       <div className="grid grid-cols-2 p-3 gap-2">
-        <div className="flex flex-col justify-center content-center p-2">
+        <div className="flex flex-col p-2">
           <div className="text-center">
             <span
               className="text-[#0E8388] font-bold text-3xl"
@@ -182,9 +207,17 @@ function Profile() {
               Recent Posts
             </span>
           </div>
-          <div className="glass mt-3 p-1">Mypost</div>
+          <div className="glass-without-shadow border-black mt-3 p-1 h-[75%] overflow-auto shadow-[inset_0_-2px_4px_rgba(0,0,0,1)]">
+            <div>
+              {authData && authData.data ? (
+                <MyPosts user={authData.data.user} />
+              ) : (
+                ""
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col justify-center content-center p-2">
+        <div className="flex flex-col p-2">
           <div className="text-center">
             <span
               className="text-[#0E8388] font-bold text-3xl"
@@ -218,26 +251,9 @@ function Profile() {
                 />
               </motion.div>
             </div>
-            <form className=" w-[60%]">
-              <div className="grid grid-cols-2 gap-3 text-[#CBE4DE]">
-                <motion.div
-                  className="col-span-2 ml-auto bg-[#0E8388] py-1 px-2 rounded hover:bg-[#CBE4DE] hover:text-[#0E8388] hover:cursor-pointer transition"
-                  whileTap={{ scale: 0.9 }}
-                >
-                  {isDisabled ? (
-                    <div onClick={() => setIsDisabled(false)} id="editBtn">
-                      <i className="fa-solid fa-pen-to-square mr-1"></i> Edit
-                    </div>
-                  ) : (
-                    <div onClick={() => saveChanges()} id="saveBtn">
-                      <i className="fa-solid fa-floppy-disk mr-1"></i>
-                      Save
-                    </div>
-                  )}
-
-                  {/* <span className="">Edit profile</span> */}
-                </motion.div>
-                <div>
+            <div className=" w-[60%]">
+              <div className="grid grid-cols-4 gap-3 text-[#CBE4DE]">
+                <div className=" col-span-2">
                   <label htmlFor="firstname">First Name</label>
                   <input
                     type="text"
@@ -249,7 +265,7 @@ function Profile() {
                     disabled={isDisabled}
                   />
                 </div>
-                <div>
+                <div className=" col-span-2">
                   <label htmlFor="lastname">Last Name</label>
                   <input
                     type="text"
@@ -261,7 +277,7 @@ function Profile() {
                     disabled={isDisabled}
                   />
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-4">
                   <label htmlFor="email">
                     Email
                     <span className="mx-2 text-red-500 text-sm italic text-center align-middle">
@@ -277,8 +293,38 @@ function Profile() {
                     disabled
                   />
                 </div>
+                <motion.div
+                  className="group col-span-3 mt-2 mr-auto bg-[#0E8388] py-1 px-2 rounded hover:bg-[#d9534f] hover:text-[#fff] hover:cursor-pointer transition"
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowChangePassDiv(true)}
+                >
+                  <span className="hidden group-hover:inline transition duration-200">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                  </span>
+                  <span>
+                    <i class="group-hover:hidden fa-solid fa-key mr-1 transition duration-200"></i>
+                  </span>
+                  Change Password
+                </motion.div>
+                <motion.div
+                  className="col-span-0.5 ml-auto mt-2 bg-[#0E8388] py-1 px-2 rounded hover:bg-[#CBE4DE] hover:text-[#0E8388] hover:cursor-pointer transition"
+                  whileTap={{ scale: 0.9 }}
+                >
+                  {isDisabled ? (
+                    <div onClick={() => setIsDisabled(false)} id="editBtn">
+                      <i className="fa-solid fa-pen-to-square mr-1"></i> Edit
+                    </div>
+                  ) : (
+                    <div onClick={() => saveChanges()} id="saveBtn">
+                      <i className="fa-solid fa-floppy-disk mr-1"></i>
+                      Save
+                    </div>
+                  )}
+
+                  {/* <span className="">Edit profile</span> */}
+                </motion.div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
