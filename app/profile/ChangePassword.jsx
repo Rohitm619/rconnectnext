@@ -67,7 +67,7 @@ function ChangePassword() {
         const token = localStorage.getItem("jwtoken");
         await axios
           .patch(
-            "http://localhost:8080/changepassword",
+            "http://192.168.10.183:8080/changepassword",
             {
               currentPassword: currentPassword.current.value,
               newPassword: newPassword.current.value,

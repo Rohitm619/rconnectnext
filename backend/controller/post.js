@@ -39,7 +39,7 @@ export const getUserPosts = async (req, res, next) => {
   let posts;
 
   try {
-    posts = await Post.find({ userId: userId });
+    posts = await Post.find({ userId: userId }).sort({ createdAt: "desc" });
   } catch (err) {
     return res.status(404).json({ message: "Couldn't find the post" });
   }

@@ -460,7 +460,7 @@ function SignUser({ signin = true }) {
     // document.getElementById("loading-div").style.display = "flex"
     e.preventDefault();
     axios
-      .post(`http://localhost:8080/signin`, {
+      .post(`http://192.168.10.183:8080/signin`, {
         email: signInEmailRef.current.value,
         password: signInPasswordRef.current.value,
       })
@@ -488,7 +488,7 @@ function SignUser({ signin = true }) {
       signUpPasswordRef.current.value === signUpConfirmPasswordRef.current.value
     )
       axios
-        .post(`http://localhost:8080/signup`, {
+        .post(`http://192.168.10.183:8080/signup`, {
           firstname: signUpFirstnameRef.current.value,
           lastname: signUpLastnameRef.current.value,
           email: signUpEmailRef.current.value,

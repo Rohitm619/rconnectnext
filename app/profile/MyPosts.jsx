@@ -8,7 +8,7 @@ function MyPosts({ user }) {
   useEffect(() => {
     const fetchMyPosts = async () => {
       await axios
-        .get(`http://localhost:8080/getuserposts/${user._id}`)
+        .get(`http://192.168.10.183:8080/getuserposts/${user._id}`)
         .then((resp) => {
           setMyPostLists(resp.data.posts);
         });
@@ -19,7 +19,7 @@ function MyPosts({ user }) {
 
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 h-[100%] overflow-auto">
         {myPostLists.map((ele, index) => (
           <Post
             key={index}

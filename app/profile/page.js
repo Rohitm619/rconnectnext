@@ -166,7 +166,7 @@ function Profile() {
           setProfileImg64(base64Img);
 
           axios.patch(
-            `http://localhost:8080/updateuser/${authData.data.user._id}`,
+            `http://192.168.10.183:8080/updateuser/${authData.data.user._id}`,
             {
               profileImage: base64Img,
             },
@@ -197,8 +197,8 @@ function Profile() {
       {alertSuccessDiv}
       {showChangePassDiv ? <>{editPasswordDiv}</> : ""}
       <Header userData={authData.data} setLoading={setLoading} />
-      <div className="grid grid-cols-2 p-3 gap-2">
-        <div className="flex flex-col p-2">
+      <div className="grid grid-cols-2 gap-2 overflow-clip">
+        <div className="flex flex-col p-2 h-[90vh]">
           <div className="text-center">
             <span
               className="text-[#0E8388] font-bold text-3xl"
@@ -207,14 +207,9 @@ function Profile() {
               Recent Posts
             </span>
           </div>
-          <div className="glass-without-shadow border-black mt-3 p-1 h-[75%] overflow-auto shadow-[inset_0_-2px_4px_rgba(0,0,0,1)]">
-            <div>
-              {authData && authData.data ? (
-                <MyPosts user={authData.data.user} />
-              ) : (
-                ""
-              )}
-            </div>
+
+          <div className="glass mt-3 overflow-hidden text-white">
+            <MyPosts user={authData.data.user} />
           </div>
         </div>
         <div className="flex flex-col p-2">
@@ -299,10 +294,10 @@ function Profile() {
                   onClick={() => setShowChangePassDiv(true)}
                 >
                   <span className="hidden group-hover:inline transition duration-200">
-                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                    <i className="fa-solid fa-triangle-exclamation mr-1"></i>
                   </span>
                   <span>
-                    <i class="group-hover:hidden fa-solid fa-key mr-1 transition duration-200"></i>
+                    <i className="group-hover:hidden fa-solid fa-key mr-1 transition duration-200"></i>
                   </span>
                   Change Password
                 </motion.div>
