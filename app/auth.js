@@ -6,7 +6,7 @@ export const auth = async () => {
   if (!token) return false;
   else {
     await axios
-      .get(`http://192.168.10.183:8080/getuser`, {
+      .get(`http://localhost:8080/getuser`, {
         headers: {
           Authorization: token,
         },
@@ -28,7 +28,7 @@ export const updateUser = async (id, updatedData) => {
   if (!token) return false;
   else {
     await axios
-      .patch(`http://192.168.10.183:8080/updateuser/${id}`, updatedData, {
+      .patch(`http://localhost:8080/updateuser/${id}`, updatedData, {
         headers: {
           Authorization: token,
         },

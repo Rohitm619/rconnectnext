@@ -80,7 +80,7 @@ function Postsection({ userData }) {
         getDownloadURL(imgRef)
           .then((url) => {
             axios
-              .post("http://192.168.10.183:8080/addpost", {
+              .post("http://localhost:8080/addpost", {
                 image: String(url),
                 caption: captionRef.current.value,
                 userId: user._id,
@@ -112,20 +112,6 @@ function Postsection({ userData }) {
   }
 
   function compressImg(e) {
-    FileResizer.imageFileResizer(
-      e.target.files[0],
-      "800",
-      "800",
-      "JPEG",
-      100,
-      0,
-      (jpeg) => {
-        const image = new Image(jpeg);
-        console.log(image);
-        console.log(image);
-      },
-      "blob"
-    );
     setPostingImg(e.target.files[0]);
   }
 
@@ -201,6 +187,7 @@ function Postsection({ userData }) {
               name="postImage"
               className="hidden"
               onChange={compressImg}
+              accept="image/*"
             />
           </motion.div>
           <motion.div

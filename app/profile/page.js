@@ -10,8 +10,12 @@ import axios from "axios";
 import FileResizer from "react-image-file-resizer";
 import ChangePassword from "./ChangePassword";
 import MyPosts from "./MyPosts";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { v4 } from "uuid";
+import { storage } from "../Firebase";
 
 function Profile() {
+  console.log("profile");
   const router = useRouter();
   const [authData, setAuthData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +25,7 @@ function Profile() {
     visible: false,
     message: "",
   });
-  const [profileImg64, setProfileImg64] = useState();
+  const [imgFlag, setImgFlag] = useState();
   const [showChangePassDiv, setShowChangePassDiv] = useState(false);
 
   const profileFirstName = useRef();
@@ -78,7 +82,7 @@ function Profile() {
     };
 
     fetchData();
-  }, [auth]);
+  }, [auth, imgFlag]);
 
   const loadingDiv = (
     <>
@@ -154,37 +158,32 @@ function Profile() {
 
   function updateProfilePic(e) {
     const token = localStorage.getItem("jwtoken");
+    let profileImg = e.target.files[0];
     const updateImg = async () => {
-      FileResizer.imageFileResizer(
-        e.target.files[0],
-        200,
-        200,
-        "JPEG",
-        100,
-        0,
-        (base64Img) => {
-          setProfileImg64(base64Img);
-
-          axios.patch(
-            `http://192.168.10.183:8080/updateuser/${authData.data.user._id}`,
-            {
-              profileImage: base64Img,
-            },
-            {
-              headers: {
-                Authorization: token,
-              },
-            }
-          );
-        },
-        "base64"
-      );
-      document.getElementById("editBtn").click();
-      setTimeout(() => {
-        document.getElementById("saveBtn").click();
-      }, 1000);
+      const imgRef = ref(storage, `profileImages/${profileImg.name + v4()}`);
+      uploadBytes(imgRef, profileImg)
+        .then(() => {
+          getDownloadURL(imgRef)
+            .then((url) => {
+              axios.patch(
+                `http://localhost:8080/updateuser/${authData.data.user._id}`,
+                {
+                  profileImage: url,
+                },
+                {
+                  headers: {
+                    Authorization: token,
+                  },
+                }
+              );
+            })
+            .catch((err) => console.log(err));
+        })
+        .catch((err) => console.log(err));
     };
+
     updateImg();
+    setImgFlag(!imgFlag);
   }
 
   {
@@ -197,23 +196,9 @@ function Profile() {
       {alertSuccessDiv}
       {showChangePassDiv ? <>{editPasswordDiv}</> : ""}
       <Header userData={authData.data} setLoading={setLoading} />
-      <div className="grid grid-cols-2 gap-2 overflow-clip">
-        <div className="flex flex-col p-2 h-[90vh]">
-          <div className="text-center">
-            <span
-              className="text-[#0E8388] font-bold text-3xl"
-              style={{ textShadow: "0 0 4px #0E8388" }}
-            >
-              Recent Posts
-            </span>
-          </div>
-
-          <div className="glass mt-3 overflow-hidden text-white">
-            <MyPosts user={authData.data.user} />
-          </div>
-        </div>
-        <div className="flex flex-col p-2">
-          <div className="text-center">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 overflow-clip">
+        <div className="flex flex-col p-2 lg:h-[90vh] lg:order-last">
+          <div className="text-center py-2">
             <span
               className="text-[#0E8388] font-bold text-3xl"
               style={{ textShadow: "0 0 4px #0E8388" }}
@@ -221,9 +206,9 @@ function Profile() {
               My Profile
             </span>
           </div>
-          <div className="glass mt-3 flex gap-4 justify-around p-4">
-            <div className="relative inline-block">
-              <motion.div className="group relative w-52 mx-auto rounded-full overflow-hidden border-[#0E8388] border-4">
+          <div className="glass mt-3 flex flex-col lg:flex-row gap-4 justify-around p-4">
+            <div className="relative flex justify-center">
+              <motion.div className="group relative inline-block lg:w-52 lg:h-52 mx-auto rounded-full overflow-hidden border-[#0E8388] border-4">
                 <div
                   className="bg-[rgba(0,0,0,0.5)] text-white cursor-pointer w-full h-full absolute group-hover:flex hidden"
                   onClick={() => document.getElementById("profilePic").click()}
@@ -242,11 +227,11 @@ function Profile() {
                 <img
                   src={authData.data.user.profileImage}
                   alt="Profile Image"
-                  className="block h-[200px] w-[200px]"
+                  className="block w-full h-full"
                 />
               </motion.div>
             </div>
-            <div className=" w-[60%]">
+            <div className=" lg:w-[60%]">
               <div className="grid grid-cols-4 gap-3 text-[#CBE4DE]">
                 <div className=" col-span-2">
                   <label htmlFor="firstname">First Name</label>
@@ -288,38 +273,54 @@ function Profile() {
                     disabled
                   />
                 </div>
-                <motion.div
-                  className="group col-span-3 mt-2 mr-auto bg-[#0E8388] py-1 px-2 rounded hover:bg-[#d9534f] hover:text-[#fff] hover:cursor-pointer transition"
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowChangePassDiv(true)}
-                >
-                  <span className="hidden group-hover:inline transition duration-200">
-                    <i className="fa-solid fa-triangle-exclamation mr-1"></i>
-                  </span>
-                  <span>
-                    <i className="group-hover:hidden fa-solid fa-key mr-1 transition duration-200"></i>
-                  </span>
-                  Change Password
-                </motion.div>
-                <motion.div
-                  className="col-span-0.5 ml-auto mt-2 bg-[#0E8388] py-1 px-2 rounded hover:bg-[#CBE4DE] hover:text-[#0E8388] hover:cursor-pointer transition"
-                  whileTap={{ scale: 0.9 }}
-                >
-                  {isDisabled ? (
-                    <div onClick={() => setIsDisabled(false)} id="editBtn">
-                      <i className="fa-solid fa-pen-to-square mr-1"></i> Edit
-                    </div>
-                  ) : (
-                    <div onClick={() => saveChanges()} id="saveBtn">
-                      <i className="fa-solid fa-floppy-disk mr-1"></i>
-                      Save
-                    </div>
-                  )}
+                <div className="flex justify-between col-span-4">
+                  <motion.div
+                    className="group mt-2 mr-auto bg-[#0E8388] py-1 px-2 rounded hover:bg-[#d9534f] hover:text-[#fff] hover:cursor-pointer transition"
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowChangePassDiv(true)}
+                  >
+                    <span className="hidden group-hover:inline transition duration-200">
+                      <i className="fa-solid fa-triangle-exclamation mr-1"></i>
+                    </span>
+                    <span>
+                      <i className="group-hover:hidden fa-solid fa-key mr-1 transition duration-200"></i>
+                    </span>
+                    Change Password
+                  </motion.div>
 
-                  {/* <span className="">Edit profile</span> */}
-                </motion.div>
+                  <motion.div
+                    className="ml-auto mt-2 bg-[#0E8388] py-1 px-2 rounded hover:bg-[#CBE4DE] hover:text-[#0E8388] hover:cursor-pointer transition"
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    {isDisabled ? (
+                      <div onClick={() => setIsDisabled(false)} id="editBtn">
+                        <i className="fa-solid fa-pen-to-square mr-1"></i> Edit
+                      </div>
+                    ) : (
+                      <div onClick={() => saveChanges()} id="saveBtn">
+                        <i className="fa-solid fa-floppy-disk mr-1"></i>
+                        Save
+                      </div>
+                    )}
+                  </motion.div>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col p-2 lg:h-[90vh] lg:order-first">
+          <div className="text-center py-2">
+            <span
+              className="text-[#0E8388] font-bold text-3xl"
+              style={{ textShadow: "0 0 4px #0E8388" }}
+            >
+              Recent Posts
+            </span>
+          </div>
+
+          <div className="mt-3 overflow-hidden text-white">
+            <MyPosts user={authData.data.user} />
           </div>
         </div>
       </div>

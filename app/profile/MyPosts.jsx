@@ -8,18 +8,29 @@ function MyPosts({ user }) {
   useEffect(() => {
     const fetchMyPosts = async () => {
       await axios
-        .get(`http://192.168.10.183:8080/getuserposts/${user._id}`)
+        .get(`http://localhost:8080/getuserposts/${user._id}`)
         .then((resp) => {
           setMyPostLists(resp.data.posts);
         });
     };
 
     fetchMyPosts();
-  }, []);
+  }, [deletePost]);
+
+  function deletePost(postId) {
+    axios
+      .delete(`http://localhost:8080/deletepost/${postId}`)
+      .then((res) => {
+        alert("post deleted");
+      })
+      .catch((err) => {
+        alert("something went wrongg!");
+      });
+  }
 
   return (
     <>
-      <div className="flex flex-col gap-2 h-[100%] overflow-auto">
+      <div className="flex flex-col gap-2 lg:h-[100%] lg:overflow-auto px-2">
         {myPostLists.map((ele, index) => (
           <Post
             key={index}
@@ -27,6 +38,9 @@ function MyPosts({ user }) {
             userImage={user.profileImage}
             caption={ele.caption}
             img={ele.image}
+            postId={ele._id}
+            deletePost={deletePost}
+            isMyPost={true}
           />
         ))}
       </div>

@@ -42,7 +42,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body className={`${inter.className} gradient-bg`}>
+      <body className={`${inter.className} gradient-bg lg:h-[100vh]`}>
         {children}
         <script
           src="https://code.jquery.com/jquery-3.7.0.slim.min.js"

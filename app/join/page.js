@@ -10,6 +10,9 @@ import { useRouter } from "next/navigation";
 import FileResizer from "react-image-file-resizer";
 import { useWindowSize } from "@uidotdev/usehooks";
 import Confetti from "react-confetti";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { v4 } from "uuid";
+import { storage } from "../Firebase";
 
 function SignUser({ signin = true }) {
   const router = useRouter();
@@ -23,6 +26,7 @@ function SignUser({ signin = true }) {
     visible: false,
     message: "",
   });
+  const [profileImg, setProfileImg] = useState();
   const { width, height } = useWindowSize();
 
   useEffect(() => {
@@ -109,29 +113,22 @@ function SignUser({ signin = true }) {
   if (authData && authData.data) redirect("/dashboard");
 
   function convertToBase62(e) {
-    FileResizer.imageFileResizer(
-      e.target.files[0],
-      200,
-      200,
-      "JPEG",
-      100,
-      0,
-      (base64Img) => {
-        console.log("bs64 in function");
-        console.log(base64Img);
-        setProfileImg64(base64Img);
-      },
-      "base64"
-    );
+    // FileResizer.imageFileResizer(
+    //   e.target.files[0],
+    //   200,
+    //   200,
+    //   "JPEG",
+    //   100,
+    //   0,
+    //   (base64Img) => {
+    //     console.log("bs64 in function");
+    //     console.log(base64Img);
+    //     setProfileImg64(base64Img);
+    //   },
+    //   "base64"
+    // );
 
-    // var reader = new FileReader();
-    // reader.readAsDataURL(e.target.files[0]);
-    // reader.onload = () => {
-    //   setProfileImg64(reader.result);
-    // };
-    // reader.onerror = (error) => {
-    //   console.log(error);
-    // };
+    setProfileImg(e.target.files[0]);
   }
 
   //Use ref for login form (desktop)
@@ -460,7 +457,7 @@ function SignUser({ signin = true }) {
     // document.getElementById("loading-div").style.display = "flex"
     e.preventDefault();
     axios
-      .post(`http://192.168.10.183:8080/signin`, {
+      .post(`http://localhost:8080/signin`, {
         email: signInEmailRef.current.value,
         password: signInPasswordRef.current.value,
       })
@@ -486,34 +483,44 @@ function SignUser({ signin = true }) {
 
     if (
       signUpPasswordRef.current.value === signUpConfirmPasswordRef.current.value
-    )
-      axios
-        .post(`http://192.168.10.183:8080/signup`, {
-          firstname: signUpFirstnameRef.current.value,
-          lastname: signUpLastnameRef.current.value,
-          email: signUpEmailRef.current.value,
-          password: signUpPasswordRef.current.value,
-          profileImage: profileImg64,
-          friendList: [],
-          pendingFriendList: [],
+    ) {
+      const imgRef = ref(storage, `profileImages/${profileImg.name + v4()}`);
+      uploadBytes(imgRef, profileImg)
+        .then(() => {
+          getDownloadURL(imgRef)
+            .then((url) => {
+              axios
+                .post(`http://localhost:8080/signup`, {
+                  firstname: signUpFirstnameRef.current.value,
+                  lastname: signUpLastnameRef.current.value,
+                  email: signUpEmailRef.current.value,
+                  password: signUpPasswordRef.current.value,
+                  profileImage: url,
+                  friendList: [],
+                  pendingFriendList: [],
+                })
+                .then(
+                  (response) => {
+                    changeSign();
+                    changeSignOnPhone();
+                    setIsCelebration(true);
+                  },
+                  (error) => {
+                    console.log(error);
+                    setAlertMsg({
+                      visible: true,
+                      message: error.response.data.message,
+                    });
+                    setTimeout(() => {
+                      setAlertMsg({ visible: false, message: "" });
+                    }, 3000);
+                  }
+                );
+            })
+            .catch((err) => console.log(err));
         })
-        .then(
-          (response) => {
-            changeSign();
-            changeSignOnPhone();
-            setIsCelebration(true);
-          },
-          (error) => {
-            console.log(error);
-            setAlertMsg({
-              visible: true,
-              message: error.response.data.message,
-            });
-            setTimeout(() => {
-              setAlertMsg({ visible: false, message: "" });
-            }, 3000);
-          }
-        );
+        .catch((err) => console.log(err));
+    }
   }
 
   return (
