@@ -1,10 +1,6 @@
 "use client";
-import SignUser from "./join/page";
-import userContext from "@/contexts/userContext";
 import { useEffect, useState } from "react";
 import { auth } from "./auth";
-import dashboard from "./dashboard/page";
-import Dashboard from "./dashboard/page";
 import AuthSelector from "./authSelector";
 import { easeInOut, motion } from "framer-motion";
 
