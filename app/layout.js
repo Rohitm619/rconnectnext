@@ -31,7 +31,11 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="true"
+        />
         <link
           href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300&display=swap"
           rel="stylesheet"
@@ -42,7 +46,10 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body className={`${inter.className} gradient-bg lg:h-[100vh]`}>
+      <body
+        className={`${inter.className} gradient-bg md:h-[100%]`}
+        style={{ backgroundAttachment: "fixed" }}
+      >
         {children}
         <script
           src="https://code.jquery.com/jquery-3.7.0.slim.min.js"

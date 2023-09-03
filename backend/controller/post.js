@@ -17,12 +17,13 @@ export const getAllPosts = async (req, res, next) => {
 };
 
 export const addPost = async (req, res, next) => {
-  const { image, caption, userId } = req.body;
+  const { image, caption, userId, imageName } = req.body;
 
   const post = new Post({
     image,
     caption,
     userId,
+    imageName,
   });
 
   try {
@@ -94,7 +95,6 @@ export const getFriendsPosts = async (req, res, next) => {
   try {
     user = await User.findOne({ _id: userId });
     friends = user.friendList;
-    console.log(friends);
     for (let friend = 0; friend < friends.length; friend++) {
       let frindsprof = await User.findOne({ email: friends[friend] });
       // console.log(frindsprof);

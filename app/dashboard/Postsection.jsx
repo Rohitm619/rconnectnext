@@ -74,7 +74,8 @@ function Postsection({ userData }) {
   }
 
   function setUploadedUrl() {
-    const imgRef = ref(storage, `image/${postingImg.name + v4()}`);
+    const imgName = postingImg.name + v4();
+    const imgRef = ref(storage, `image/${imgName}`);
     uploadBytes(imgRef, postingImg)
       .then(() => {
         getDownloadURL(imgRef)
@@ -84,6 +85,7 @@ function Postsection({ userData }) {
                 image: String(url),
                 caption: captionRef.current.value,
                 userId: user._id,
+                imageName: imgName,
               })
               .then((response) => {
                 setShowPostMaker(false);
@@ -117,7 +119,7 @@ function Postsection({ userData }) {
 
   const postMaker = (
     <div
-      className="w-screen h-screen fixed z-30 bg-[rgba(0,0,0,0.5)] left-0 top-0 flex justify-center items-center text-white"
+      className="w-screen h-screen fixed z-40 bg-[rgba(0,0,0,0.5)] left-0 top-0 flex justify-center items-center text-white"
       onClick={switchPostMaker}
     >
       <div
@@ -160,13 +162,13 @@ function Postsection({ userData }) {
               ></textarea>
               <hr className="w-[90%] mx-auto my-1 text-[#0E8388]" />
               {postingImg ? (
-                <>
+                <div className="h-[20vh]">
                   <img
                     src={URL.createObjectURL(postingImg)}
                     className="w-fit m-auto"
                     alt=""
                   />
-                </>
+                </div>
               ) : (
                 ""
               )}
@@ -187,7 +189,7 @@ function Postsection({ userData }) {
               name="postImage"
               className="hidden"
               onChange={compressImg}
-              accept="image/*"
+              accept="image/jpg, image/jpeg, image/png"
             />
           </motion.div>
           <motion.div
@@ -209,7 +211,7 @@ function Postsection({ userData }) {
       {alertSuccessDiv}
       {showPostMaker ? <>{postMaker}</> : ""}
 
-      <div>
+      <div className="">
         <div className="w-full rounded-xl py-1 glass px-3 pt-3">
           <div className="flex justify-center gap-4 content-center">
             <div>

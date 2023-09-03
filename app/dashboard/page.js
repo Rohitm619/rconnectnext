@@ -8,6 +8,8 @@ import Header from "./Header";
 import "./dashboard.css";
 import Postsection from "./Postsection";
 import Post from "@/backend/model/Post";
+import Feed from "./Feed";
+import FriendRequests from "./FriendRequests";
 
 function Dashboard() {
   const [authData, setAuthData] = useState(null);
@@ -59,19 +61,20 @@ function Dashboard() {
     } else if (authData && authData.data) {
       return (
         <>
-          <div className="BodyComponent fluid-container pt-1">
-            <div className="mb-3">
+          <div className="fluid-container pt-1">
+            <div className="sticky z-30 w-screen gradient-bg top-0 pb-1 mb-3">
               <Header userData={authData.data} setLoading={setLoading} />
             </div>
             <div className="grid lg:grid-cols-4 justify-items-center gap-3 px-3">
               <div className="hidden lg:block glass h-80 col-span-1 w-full text-center">
                 1
               </div>
-              <div className="col-span-2 w-full text-center p-1">
+              <div className="col-span-2 h-[100%] lg:h-[100vh] overflow-auto flex flex-col gap-2 w-full text-center p-1 scrollbar-hide">
                 <Postsection userData={authData.data} />
+                <Feed userData={authData.data} />
               </div>
-              <div className="hidden lg:block glass h-80 col-span-1 w-full text-center">
-                3
+              <div className="hidden lg:block glass h-80 col-span-1 w-full text-center p-2">
+                <FriendRequests userData={authData.data} />
               </div>
             </div>
           </div>

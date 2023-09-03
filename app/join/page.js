@@ -264,6 +264,7 @@ function SignUser({ signin = true }) {
               className="form-control"
               ref={profileImage}
               onChange={convertToBase62}
+              accept="image/jpg, image/jpeg, image/png"
             />
           </div>
           <div className="col-span-2 flex justify-center">
@@ -404,6 +405,17 @@ function SignUser({ signin = true }) {
                 placeholder="Confirm Password"
                 className="form-control"
                 ref={signUpConfirmPasswordRef}
+              />
+            </div>
+            <div className="col-span-2">
+              <label htmlFor="profilepic">Profile Picture</label>
+              <input
+                type="file"
+                name="profilepic"
+                className="form-control"
+                ref={profileImage}
+                accept="image/jpg, image/jpeg, image/png"
+                onChange={convertToBase62}
               />
             </div>
             <div className="col-span-2 flex justify-center">

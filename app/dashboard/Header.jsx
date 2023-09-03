@@ -3,11 +3,16 @@ import { capitalizeFirstLetter } from "../miscfuncs";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Skeleton from "react-loading-skeleton";
+
+import axios from "axios";
 
 function Header({ userData, setLoading }) {
   const router = useRouter();
   const [userDropDownPos, setUserDropDownPos] = useState(false);
   const [userDropDownPhonePos, setUserDropDownPhonePos] = useState(false);
+  const [searchedUsers, setSearchedUsers] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   function logout() {
     localStorage.removeItem("jwtoken");
@@ -35,18 +40,68 @@ function Header({ userData, setLoading }) {
         <i className="fas fa-regular fa-bell"></i>
         <span className="ml-2 group-hover:inline">Notifications</span>
       </motion.button>
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        className="group text-[#CBE4DE] px-2.5 py-1 bg-[#0E8388] rounded-full cursor-pointer hover:bg-[#CBE4DE] hover:text-[#2E4F4F] active:bg-[#0E8388] active:text-[#CBE4DE] active:shadow active:shadow-[#2E4F4F] transition-all duration-300"
-      >
-        <i className="fas fa-solid fa-message"></i>
-        <span className="ml-2 group-hover:inline">Messages</span>
-      </motion.button>
+      <Link href="/messages" className="text-white no-underline">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          className="group text-[#CBE4DE] px-2.5 py-1 bg-[#0E8388] rounded-full cursor-pointer hover:bg-[#CBE4DE] hover:text-[#2E4F4F] active:bg-[#0E8388] active:text-[#CBE4DE] active:shadow active:shadow-[#2E4F4F] transition-all duration-300"
+        >
+          <i className="fas fa-solid fa-message"></i>
+          <span className="ml-2 group-hover:inline">Messages</span>
+        </motion.button>
+      </Link>
     </>
   );
 
+  async function findUsers(e) {
+    let text = e.target.value.trim();
+    const token = localStorage.getItem("jwtoken");
+    if (text === "") {
+      setSearchedUsers(null);
+    } else {
+      if (text.indexOf(" ") !== -1) {
+        const name = text.split(" ");
+        // contains spaces
+        try {
+          await axios
+            .get(`http://localhost:8080/getuserbytext/${name[0]}/${name[1]}`, {
+              headers: {
+                Authorization: token,
+              },
+            })
+            .then((res) => {
+              console.log(res.data);
+              setSearchedUsers(res.data);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        // text with no spaces
+        try {
+          await axios
+            .get(`http://localhost:8080/getuserbytext/${text}`, {
+              headers: {
+                Authorization: token,
+              },
+            })
+            .then((res) => {
+              setSearchedUsers(res.data);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+  }
+
   return (
-    <span className=" text-sm">
+    <span className="text-sm">
       {/* navbar goes here */}
       <nav className="grid grid-cols-5 lg:grid-cols-11 text-center pt-2 pr-2">
         {/* logo */}
@@ -65,12 +120,51 @@ function Header({ userData, setLoading }) {
           />
         </div>
         {/* input search */}
-        <div className="col-span-3 lg:col-span-5 flex justify-center lg:justify-start">
+        <div className="relative col-span-3 lg:col-span-5 flex justify-center lg:justify-start items-center">
           <input
             type="text"
             className="px-3 text-white glass rounded-xl  border-[#082032] focus:outline-none focus:shadow-none focus:bg-[#334756] lg:w-2/4 h-8"
             placeholder="# Explore"
+            onKeyUp={findUsers}
           />
+
+          {searchedUsers ? (
+            <div className="absolute flex flex-col lg:w-2/4 max-h-60 overflow-auto p-2 px-3 gap-3 text-white left-0 top-10 glass-without-border-radius rounded-md">
+              {searchedUsers.length > 0
+                ? searchedUsers.map((ele, index) => (
+                    <div key={index} className="relative flex gap-2 ">
+                      <div className="relative rounded-full w-12 h-12 p-0 overflow-hidden border-2 border-[#0E8388]">
+                        {!imageLoaded && (
+                          <Skeleton
+                            className="w-full h-full top-0 m-0 absolute left-0"
+                            highlightColor="rgba(0,0,0,0.5)"
+                            baseColor="#0E8388"
+                          />
+                        )}
+                        <img
+                          src={ele.profileImage}
+                          className={`${
+                            !imageLoaded ? "hidden" : ""
+                          } w-full h-full`}
+                          alt=""
+                          onLoad={() => setImageLoaded(true)}
+                        />
+                      </div>
+                      <div className="[&>div]:leading-snug flex items-center">
+                        <div className="font-bold text-[#0E8388]">
+                          {ele.firstname} {ele.lastname}
+                        </div>
+                        {/* <div className="text-[#CBE4DE] text-left">
+                          last message
+                        </div> */}
+                      </div>
+                    </div>
+                  ))
+                : "No results"}
+            </div>
+          ) : (
+            ""
+          )}
         </div>
         {/* user profile and menu for desktop */}
         <div className="col-span-1 lg:col-span-5">
@@ -100,13 +194,15 @@ function Header({ userData, setLoading }) {
                 userDropDownPhonePos ? "flex" : "hidden"
               } flex-col glass text-white rounded absolute right-2 top-14 z-30 overflow-hidden`}
             >
-              <motion.div
-                className="cursor-pointer p-2 relative w-[100%]"
-                whileHover={{ backgroundColor: "#0E8388", color: "#CBE4DE" }}
-                onClick={() => console.log("kajsbdaks")}
-              >
-                <i className="fas fa-solid fa-user"></i> &nbsp; My Profile
-              </motion.div>
+              <Link href="/profile" className="text-white no-underline">
+                <motion.div
+                  className="cursor-pointer p-2 relative w-[100%]"
+                  whileHover={{ backgroundColor: "#0E8388", color: "#CBE4DE" }}
+                  onClick={() => console.log("kajsbdaks")}
+                >
+                  <i className="fas fa-solid fa-user"></i> &nbsp; My Profile
+                </motion.div>
+              </Link>
               <hr className="m-0" />
               <motion.div
                 className="cursor-pointer p-2"

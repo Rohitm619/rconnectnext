@@ -9,7 +9,11 @@ dotenv.config();
 export const getAllUser = async (req, res, next) => {
   let users;
   try {
-    users = await User.find({});
+    users = await User.find({}).select([
+      "-password",
+      "-friendList",
+      "-pendingFriendList",
+    ]);
   } catch (err) {
     console.log(err);
   }
@@ -73,7 +77,7 @@ export const signIn = async (req, res, next) => {
     existingUser = await User.findOne({ email: email }).select([
       "-profileImage",
       "-friendList",
-      "-pendingFrienList",
+      "-pendingFriendList",
     ]);
   } catch (err) {
     console.log(err);
@@ -87,7 +91,7 @@ export const signIn = async (req, res, next) => {
       Jwt.sign(
         { existingUser },
         process.env.JWT_SECRET_Key,
-        { expiresIn: "5m" },
+        { expiresIn: "1h" },
         (err, token) => {
           if (err) {
             console.log(err);
@@ -139,12 +143,68 @@ export const getUser = async (req, res, next) => {
   let user;
   let id = req.user.existingUser._id;
   try {
-    user = await User.findOne({ _id: id });
+    user = await User.findOne({ _id: id }).select([
+      "-password",
+      "-friendList",
+      "-pendingFriendList",
+    ]);
   } catch (err) {
     console.log(err);
     return res.status(404).json({ message: "Couldn't find the user" });
   }
   return res.status(200).json({ user });
+};
+
+export const getUserById = async (req, res, next) => {
+  let user;
+  let id = req.params.userid;
+  try {
+    user = await User.findOne({ _id: id }).select([
+      "-password",
+      "-friendList",
+      "-pendingFriendList",
+    ]);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ message: "Couldn't find the user" });
+  }
+  return res.status(200).json({ user });
+};
+
+export const getUserByText = async (req, res, next) => {
+  let users;
+  let text = req.params.text;
+  try {
+    users = await User.find({
+      $or: [
+        { firstname: { $regex: text, $options: "i" } },
+        { lastname: { $regex: text, $options: "i" } },
+        { email: { $regex: text, $options: "i" } },
+      ],
+    }).select(["-password", "-friendList", "-pendingFriendList"]);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ message: "Couldn't find the user" });
+  }
+  return res.status(200).json(users);
+};
+
+export const getUserByTwoTexts = async (req, res, next) => {
+  let users;
+  let firstname = req.params.firstname;
+  let lastname = req.params.lastname;
+  try {
+    users = await User.find({
+      $and: [
+        { firstname: { $regex: firstname, $options: "i" } },
+        { lastname: { $regex: lastname, $options: "i" } },
+      ],
+    }).select(["-password", "-friendList", "-pendingFriendList"]);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ message: "Couldn't find the user" });
+  }
+  return res.status(200).json(users);
 };
 
 export const myProfile = async (req, res, next) => {

@@ -15,7 +15,6 @@ import { v4 } from "uuid";
 import { storage } from "../Firebase";
 
 function Profile() {
-  console.log("profile");
   const router = useRouter();
   const [authData, setAuthData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,7 +29,7 @@ function Profile() {
 
   const profileFirstName = useRef();
   const profileLastName = useRef();
-  const profileImage = useRef();
+  const saveBtn = useRef();
 
   const alertDiv = (
     <motion.div
@@ -82,7 +81,7 @@ function Profile() {
     };
 
     fetchData();
-  }, [auth, imgFlag]);
+  }, [auth]);
 
   const loadingDiv = (
     <>
@@ -183,7 +182,10 @@ function Profile() {
     };
 
     updateImg();
-    setImgFlag(!imgFlag);
+    document.getElementById("editBtn").click();
+    setTimeout(() => {
+      document.getElementById("saveBtn").click();
+    }, 2000);
   }
 
   {
@@ -208,7 +210,7 @@ function Profile() {
           </div>
           <div className="glass mt-3 flex flex-col lg:flex-row gap-4 justify-around p-4">
             <div className="relative flex justify-center">
-              <motion.div className="group relative inline-block lg:w-52 lg:h-52 mx-auto rounded-full overflow-hidden border-[#0E8388] border-4">
+              <motion.div className="group relative inline-block lg:w-52 lg:h-52 w-52 h-52 mx-auto rounded-full overflow-hidden border-[#0E8388] border-4">
                 <div
                   className="bg-[rgba(0,0,0,0.5)] text-white cursor-pointer w-full h-full absolute group-hover:flex hidden"
                   onClick={() => document.getElementById("profilePic").click()}
@@ -221,6 +223,7 @@ function Profile() {
                     type="file"
                     className="hidden"
                     id="profilePic"
+                    accept="image/jpg, image/jpeg, image/png"
                     onChange={updateProfilePic}
                   />
                 </div>
@@ -231,6 +234,9 @@ function Profile() {
                 />
               </motion.div>
             </div>
+            <span className="lg:hidden text-center text-red-500 italic">
+              *Click on profile image to change
+            </span>
             <div className=" lg:w-[60%]">
               <div className="grid grid-cols-4 gap-3 text-[#CBE4DE]">
                 <div className=" col-span-2">
@@ -297,7 +303,11 @@ function Profile() {
                         <i className="fa-solid fa-pen-to-square mr-1"></i> Edit
                       </div>
                     ) : (
-                      <div onClick={() => saveChanges()} id="saveBtn">
+                      <div
+                        onClick={() => saveChanges()}
+                        id="saveBtn"
+                        ref={saveBtn}
+                      >
                         <i className="fa-solid fa-floppy-disk mr-1"></i>
                         Save
                       </div>

@@ -10,6 +10,9 @@ import {
   updateUser,
   myProfile,
   changePassword,
+  getUserById,
+  getUserByText,
+  getUserByTwoTexts,
 } from "../controller/user";
 import { verifyUser } from "../middleware/user";
 
@@ -17,6 +20,13 @@ const userRouter = express.Router();
 
 userRouter.get("/getallusers", getAllUser);
 userRouter.get("/getuser", verifyUser, getUser);
+userRouter.get("/getuserbyid/:userid", verifyUser, getUserById);
+userRouter.get("/getuserbytext/:text", verifyUser, getUserByText);
+userRouter.get(
+  "/getuserbytext/:firstname/:lastname",
+  verifyUser,
+  getUserByTwoTexts
+);
 userRouter.get("/myprofile", verifyUser, myProfile);
 userRouter.post("/signup", signUp);
 userRouter.post("/signin", signIn);
