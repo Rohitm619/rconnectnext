@@ -73,7 +73,7 @@ function Dashboard() {
                 <Postsection userData={authData.data} />
                 <Feed userData={authData.data} />
               </div>
-              <div className="hidden lg:block glass h-80 col-span-1 w-full text-center p-2">
+              <div className="hidden lg:block h-fit col-span-1 w-full text-center py-1">
                 <FriendRequests userData={authData.data} />
               </div>
             </div>

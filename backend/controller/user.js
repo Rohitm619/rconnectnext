@@ -143,11 +143,7 @@ export const getUser = async (req, res, next) => {
   let user;
   let id = req.user.existingUser._id;
   try {
-    user = await User.findOne({ _id: id }).select([
-      "-password",
-      "-friendList",
-      "-pendingFriendList",
-    ]);
+    user = await User.findOne({ _id: id }).select(["-password"]);
   } catch (err) {
     console.log(err);
     return res.status(404).json({ message: "Couldn't find the user" });
@@ -181,7 +177,7 @@ export const getUserByText = async (req, res, next) => {
         { lastname: { $regex: text, $options: "i" } },
         { email: { $regex: text, $options: "i" } },
       ],
-    }).select(["-password", "-friendList", "-pendingFriendList"]);
+    }).select(["-password"]);
   } catch (err) {
     console.log(err);
     return res.status(404).json({ message: "Couldn't find the user" });
@@ -199,7 +195,7 @@ export const getUserByTwoTexts = async (req, res, next) => {
         { firstname: { $regex: firstname, $options: "i" } },
         { lastname: { $regex: lastname, $options: "i" } },
       ],
-    }).select(["-password", "-friendList", "-pendingFriendList"]);
+    }).select(["-password"]);
   } catch (err) {
     console.log(err);
     return res.status(404).json({ message: "Couldn't find the user" });
@@ -219,6 +215,78 @@ export const updateUser = async (req, res, next) => {
 
   try {
     result = await User.updateOne({ _id: myid }, { $set: updates });
+  } catch (err) {
+    return res.status(404).json({ message: "Couldn't find the user" });
+  }
+  return res.status(200).json({ result });
+};
+
+export const updateUserFriendList = async (req, res, next) => {
+  let myid = req.params.userid;
+  let isDelete = req.params.isdelete === "remove" ? true : false;
+  let newFriend = req.body.friendEmail;
+  let result;
+
+  try {
+    if (!isDelete) {
+      result = await User.updateOne(
+        { _id: myid },
+        { $push: { friendList: newFriend } }
+      );
+    } else {
+      result = await User.updateOne(
+        { _id: myid },
+        { $pull: { friendList: newFriend } }
+      );
+    }
+  } catch (err) {
+    return res.status(404).json({ message: "Couldn't find the user" });
+  }
+  return res.status(200).json({ result });
+};
+
+export const updateUserPendingFriendList = async (req, res, next) => {
+  let myid = req.params.userid;
+  let isDelete = req.params.isdelete === "remove" ? true : false;
+  let newFriend = req.body.friendEmail;
+  let result;
+
+  try {
+    if (!isDelete) {
+      result = await User.updateOne(
+        { _id: myid },
+        { $push: { pendingFriendList: newFriend } }
+      );
+    } else {
+      result = await User.updateOne(
+        { _id: myid },
+        { $pull: { pendingFriendList: newFriend } }
+      );
+    }
+  } catch (err) {
+    return res.status(404).json({ message: "Couldn't find the user" });
+  }
+  return res.status(200).json({ result });
+};
+
+export const updateUserSentFriendReqList = async (req, res, next) => {
+  let myid = req.params.userid;
+  let isDelete = req.params.isdelete === "remove" ? true : false;
+  let newFriend = req.body.friendEmail;
+  let result;
+
+  try {
+    if (!isDelete) {
+      result = await User.updateOne(
+        { _id: myid },
+        { $push: { sentFriendRequests: newFriend } }
+      );
+    } else {
+      result = await User.updateOne(
+        { _id: myid },
+        { $pull: { sentFriendRequests: newFriend } }
+      );
+    }
   } catch (err) {
     return res.status(404).json({ message: "Couldn't find the user" });
   }

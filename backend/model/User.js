@@ -25,6 +25,7 @@ const userSchema = new Schema({
   },
   friendList: [String],
   pendingFriendList: [String],
+  sentFriendRequests: [String],
 });
 
 export default mongoose.model("User", userSchema);

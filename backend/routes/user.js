@@ -13,6 +13,9 @@ import {
   getUserById,
   getUserByText,
   getUserByTwoTexts,
+  updateUserFriendList,
+  updateUserPendingFriendList,
+  updateUserSentFriendReqList,
 } from "../controller/user";
 import { verifyUser } from "../middleware/user";
 
@@ -31,6 +34,22 @@ userRouter.get("/myprofile", verifyUser, myProfile);
 userRouter.post("/signup", signUp);
 userRouter.post("/signin", signIn);
 userRouter.patch("/updateuser/:userid", verifyUser, updateUser);
+userRouter.patch(
+  "/updateuserfriendlist/:userid/:isdelete?",
+  verifyUser,
+  updateUserFriendList
+);
+userRouter.patch(
+  "/updateuserpendingfriendlist/:userid/:isdelete?",
+  verifyUser,
+  updateUserPendingFriendList
+);
+
+userRouter.patch(
+  "/updateusersentfriendreqlist/:userid/:isdelete?",
+  verifyUser,
+  updateUserSentFriendReqList
+);
 userRouter.delete("/deleteuser/:userid", verifyUser, deleteUser);
 userRouter.get("/getfriends/:userid", verifyUser, getFriends);
 userRouter.get("/getpendingfriends/:userid", verifyUser, getPendingFriends);

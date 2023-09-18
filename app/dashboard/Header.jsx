@@ -100,6 +100,40 @@ function Header({ userData, setLoading }) {
     }
   }
 
+  function msgUser(userId) {
+    console.log(userId);
+    router.push(`/messages?createchat=${userId}`);
+  }
+
+  function addFriend(newEmail, newId) {
+    const token = localStorage.getItem("jwtoken");
+    axios
+      .patch(
+        `http://localhost:8080/updateusersentfriendreqlist/${userData.user._id}`,
+        {
+          friendEmail: newEmail,
+        },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+      .then((res) => {
+        axios.patch(
+          `http://localhost:8080/updateuserpendingfriendlist/${newId}`,
+          {
+            friendEmail: userData.user.email,
+          },
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+      });
+  }
+
   return (
     <span className="text-sm">
       {/* navbar goes here */}
@@ -129,34 +163,74 @@ function Header({ userData, setLoading }) {
           />
 
           {searchedUsers ? (
-            <div className="absolute flex flex-col lg:w-2/4 max-h-60 overflow-auto p-2 px-3 gap-3 text-white left-0 top-10 glass-without-border-radius rounded-md">
+            <div className="absolute flex flex-col lg:w-2/4 w-[100%] max-h-60 overflow-auto p-2 px-3 gap-3 text-white left-0 top-10 glass-without-border-radius-dark lg:glass-without-border-radius rounded-md">
               {searchedUsers.length > 0
                 ? searchedUsers.map((ele, index) => (
-                    <div key={index} className="relative flex gap-2 ">
-                      <div className="relative rounded-full w-12 h-12 p-0 overflow-hidden border-2 border-[#0E8388]">
-                        {!imageLoaded && (
-                          <Skeleton
-                            className="w-full h-full top-0 m-0 absolute left-0"
-                            highlightColor="rgba(0,0,0,0.5)"
-                            baseColor="#0E8388"
+                    <div key={index} className="relative flex justify-between">
+                      <div className="flex gap-2 items-center">
+                        <div className="relative rounded-full w-12 h-12 p-0 overflow-hidden border-2 border-[#0E8388]">
+                          {!imageLoaded && (
+                            <Skeleton
+                              className="w-full h-full top-0 m-0 absolute left-0"
+                              highlightColor="rgba(0,0,0,0.5)"
+                              baseColor="#0E8388"
+                            />
+                          )}
+                          <img
+                            src={ele.profileImage}
+                            className={`${
+                              !imageLoaded ? "hidden" : ""
+                            } w-full h-full`}
+                            alt=""
+                            onLoad={() => setImageLoaded(true)}
                           />
-                        )}
-                        <img
-                          src={ele.profileImage}
-                          className={`${
-                            !imageLoaded ? "hidden" : ""
-                          } w-full h-full`}
-                          alt=""
-                          onLoad={() => setImageLoaded(true)}
-                        />
-                      </div>
-                      <div className="[&>div]:leading-snug flex items-center">
-                        <div className="font-bold text-[#0E8388]">
-                          {ele.firstname} {ele.lastname}
                         </div>
-                        {/* <div className="text-[#CBE4DE] text-left">
-                          last message
-                        </div> */}
+                        <div className="[&>div]:leading-snug">
+                          <div className="font-bold text-[#0E8388] text-left">
+                            {ele.firstname} {ele.lastname}
+                          </div>
+                          <div className="text-[#CBE4DE] text-left">
+                            {ele.email}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        {userData.user.friendList.includes(ele.email) ? (
+                          <div className="bg-red-200 text-red-700 p-1 w-7 h-7 rounded text-sm">
+                            <i class="fa-solid fa-user-minus"></i>
+                          </div>
+                        ) : userData.user.pendingFriendList.includes(
+                            ele.email
+                          ) ? (
+                          <div className="flex gap-1">
+                            <div className="flex items-center bg-red-200 w-7 h-7 text-red-700 hover:shadow-sm hover:shadow-red-700 rounded text-sm justify-center">
+                              <i className="fa-solid fa-xmark"></i>
+                            </div>
+                            <div
+                              className="flex items-center bg-[#CBE4DE] w-7 h-7 text-[#2E4F4F] hover:shadow-sm hover:shadow-[#2E4F4F] p-1 rounded justify-center"
+                              onClick={() => updateFriendList(ele.email)}
+                            >
+                              <i className="fa-solid fa-check"></i>
+                            </div>
+                          </div>
+                        ) : userData.user.sentFriendRequests.includes(
+                            ele.email
+                          ) ? (
+                          <>
+                            <div className="bg-red-200 text-red-700 p-1 w-7 h-7 rounded text-sm">
+                              <i class="fa-solid fa-user-xmark"></i>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div
+                              className="flex items-center bg-[#CBE4DE] w-7 h-7 text-[#2E4F4F] hover:shadow-sm hover:shadow-[#2E4F4F] p-1 rounded justify-center"
+                              onClick={() => updateFriendList(ele.email)}
+                            >
+                              <i className="fa-solid fa-user-plus"></i>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))
@@ -246,7 +320,7 @@ function Header({ userData, setLoading }) {
                 <motion.div
                   className="cursor-pointer p-2 relative w-[100%]"
                   whileHover={{ backgroundColor: "#0E8388", color: "#CBE4DE" }}
-                  whileTap={{ scale: 0.9 }}
+                  whileTap={{ backgroundColor: "#CBE4DE", color: "#0E8388" }}
                 >
                   <i className="fas fa-solid fa-user"></i> &nbsp; My Profile
                 </motion.div>

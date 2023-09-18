@@ -468,27 +468,35 @@ function SignUser({ signin = true }) {
   function onSignin(e) {
     // document.getElementById("loading-div").style.display = "flex"
     e.preventDefault();
-    axios
-      .post(`http://localhost:8080/signin`, {
-        email: signInEmailRef.current.value,
-        password: signInPasswordRef.current.value,
-      })
-      .then(
-        (response) => {
-          localStorage.setItem("jwtoken", response.data.token);
-          setAlertSuccessMsg({ visible: true, message: "Logging in..." });
-          setTimeout(() => {
-            setAlertSuccessMsg({ visible: false, message: "" });
-          }, 3000);
-          router.push("/dashboard");
-        },
-        (error) => {
-          setAlertMsg({ visible: true, message: error.response.data.message });
-          setTimeout(() => {
-            setAlertMsg({ visible: false, message: "" });
-          }, 3000);
-        }
-      );
+
+    try {
+      axios
+        .post(`http://localhost:8080/signin`, {
+          email: signInEmailRef.current.value,
+          password: signInPasswordRef.current.value,
+        })
+        .then(
+          (response) => {
+            localStorage.setItem("jwtoken", response.data.token);
+            setAlertSuccessMsg({ visible: true, message: "Logging in..." });
+            setTimeout(() => {
+              setAlertSuccessMsg({ visible: false, message: "" });
+            }, 3000);
+            router.push("/dashboard");
+          },
+          (error) => {
+            setAlertMsg({
+              visible: true,
+              message: error.response.data.message,
+            });
+            setTimeout(() => {
+              setAlertMsg({ visible: false, message: "" });
+            }, 3000);
+          }
+        );
+    } catch (error) {
+      console.log("SignIn");
+    }
   }
   function onSignup(e) {
     e.preventDefault();

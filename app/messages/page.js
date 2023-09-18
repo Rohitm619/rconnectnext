@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import Header from "../dashboard/Header";
@@ -8,9 +8,15 @@ import UserChat from "./UserChat";
 import { auth } from "../auth";
 import { motion, easeInOut } from "framer-motion";
 const socket = io.connect("http://localhost:8080");
+import { v4 } from "uuid";
 
 function page() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const createChat = useState(
+    searchParams.get("createchat") ? searchParams.get("createchat") : null
+  );
   const [userChats, setUserChats] = useState();
   const [authData, setAuthData] = useState(null);
   const [loading, setLoading] = useState(true);
